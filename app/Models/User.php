@@ -4,12 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
+use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Project;
 
 class User extends Authenticatable
 {
@@ -18,6 +19,7 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
+    use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
 
@@ -67,18 +69,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the projects for the user.
+     * Get all projects directly owned by the user.
      */
-    public function projects(): HasMany
+    public function projects()
     {
-        return $this->hasMany(Project::class);
-    }
-
-    /**
-     * Get the tasks for the user.
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(Project::class, 'user_id');
     }
 }

@@ -13,11 +13,15 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->text('description')->nullable();
-            $table->string('status')->default('active');
-            $table->timestamp('due_date')->nullable();
+            $table->string('title');
+            $table->text('description');
+            $table->date('start_date');
+            $table->date('end_date');
+
+            $table->unsignedBigInteger('team_id');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('team_id')->references('id')->on('teams');
+            $table->foreign('user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }

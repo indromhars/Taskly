@@ -17,11 +17,12 @@ class Project extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'title',
         'description',
-        'user_id',
-        'status',
-        'due_date',
+        'start_date',
+        'end_date',
+        'team_id',
+        'user_id'
     ];
 
     /**
@@ -31,29 +32,23 @@ class Project extends Model
      */
     protected $casts = [
         'due_date' => 'datetime',
+        'end_date' => 'datetime',
+        'start_date' => 'datetime',
     ];
 
     /**
-     * Get the user that owns the project.
+     * Get the team that owns the project.
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+
+    /**
+     * Get the user that created the project.
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the boards for the project.
-     */
-    public function boards(): HasMany
-    {
-        return $this->hasMany(Board::class);
-    }
-
-    /**
-     * Get the tasks for the project.
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

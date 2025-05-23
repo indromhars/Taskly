@@ -1,22 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Team;
+use App\Http\Controllers\TeamInvitationController;
+use App\Http\Controllers\TeamController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
+
+
 
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    // Home Route
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
-
-    // Dashboard Route
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -30,7 +29,25 @@ Route::middleware([
         return view('projects.create');
     })->name('projects.create');
 
-    Route::get('/projects/{project}', function ($project) {
-        return view('projects.show', ['project' => $project]);
-    })->name('projects.show');
+    // Team routes
+    Route::get('/teams/create', function () {
+        return view('teams.create');
+    })->name('teams.create');
+
+    Route::get('/teams/{team}', function (Team $team) {
+        return view('teams.show', ['team' => $team]);
+    })->name('teams.show');
+
+    Route::put('/current-team', [TeamController::class, 'switchTeam'])->name('current-team.update');
+
+    // Team invitation routes
+    Route::get('/teams/invitations/{invitation}/accept', [TeamInvitationController::class, 'accept'])
+        ->name('team.invitation.accept')
+        ->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']);
+
+    Route::get('/teams/invitations/{invitation}/reject', [TeamInvitationController::class, 'reject'])
+        ->name('team.invitation.reject')
+        ->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']);
+
+    Route::delete('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
 });

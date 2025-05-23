@@ -18,13 +18,11 @@ class Task extends Model
     protected $fillable = [
         'title',
         'description',
-        'project_id',
-        'board_id',
-        'user_id',
-        'order',
         'due_date',
-        'priority',
         'status',
+        'priority',
+        'project_id',
+        'assignee_id'
     ];
 
     /**
@@ -41,22 +39,15 @@ class Task extends Model
      */
     public function project(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Project::class, 'project_id');
     }
 
-    /**
-     * Get the board that owns the task.
-     */
-    public function board(): BelongsTo
-    {
-        return $this->belongsTo(Board::class);
-    }
 
     /**
      * Get the user that owns the task.
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'assignee_id');
     }
 }
