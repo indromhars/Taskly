@@ -51,4 +51,9 @@ class Project extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

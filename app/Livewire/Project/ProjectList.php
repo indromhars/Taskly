@@ -30,11 +30,16 @@ class ProjectList extends Component
 
     public function render()
     {
+        $user = Auth::user();
+        $teamIds = $user->teams->pluck('id');
+        $projects = Project::whereIn('team_id', $teamIds)
+            ->where('team_id', $user->currentTeam->id)
+            ->orWhere('user_id', Auth::id())
+            ->latest()
+            ->paginate(9);
+
         return view('livewire.project.project-list', [
-            'projects' => Project::where('team_id', Auth::user()->currentTeam->id)
-                ->where('user_id', Auth::user()->id)
-                ->latest()
-                ->paginate(10)
-        ]);
+            'projects' => $projects,
+        ])->layout('layouts.app');
     }
 }

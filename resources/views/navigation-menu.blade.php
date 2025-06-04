@@ -100,7 +100,7 @@
                         }
                     @endphp
                     @foreach ($projects as $project)
-                        <a href="{{ route('projects.index', $project) }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('projects.show') && request()->route('project') == $project->id ? 'bg-gray-700 text-white' : '' }}">
+                        <a href="{{ route('projects.kanban', ['project' => $project->id]) }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white {{ request()->routeIs('projects.kanban') && request()->route('project') == $project->id ? 'bg-gray-700 text-white' : '' }}">
                             {{ $project->title }}
                         </a>
                     @endforeach

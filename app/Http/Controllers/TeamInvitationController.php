@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\TeamInvitationResponse;
+use Illuminate\Support\Facades\DB;
 
 class TeamInvitationController extends Controller
 {
@@ -23,7 +24,7 @@ class TeamInvitationController extends Controller
         $team = $invitation->team;
 
         // Add user to team
-        Auth::user()->teams()->attach($team, ['role' => $invitation->role]);
+        Auth::user()->teams()->syncWithoutDetaching([$team->id => ['role' => $invitation->role]]);
 
         // Notify team owner
         $team->owner->notify(new TeamInvitationResponse(

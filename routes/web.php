@@ -4,26 +4,24 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Team;
 use App\Http\Controllers\TeamInvitationController;
 use App\Http\Controllers\TeamController;
-
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
-
-
+use App\Livewire\Project\ProjectList;
+use App\Livewire\Task\TaskKanbanBoard;
 
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    Route::get('/', function () {
+        return view('welcome');
+    })->name('home');
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
     // Projects Routes
-    Route::get('/projects', function () {
-        return view('projects.index');
-    })->name('projects.index');
+    Route::get('/projects', ProjectList::class)->name('projects.index');
 
     Route::get('/projects/create', function () {
         return view('projects.create');
@@ -50,4 +48,9 @@ Route::middleware([
         ->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']);
 
     Route::delete('/teams/{team}/leave', [TeamController::class, 'leave'])->name('teams.leave');
+
+    // Kanban Board Routes
+    Route::get('/projects/{project}/kanban', TaskKanbanBoard::class)
+        ->name('projects.kanban')
+        ->where('project', '[0-9]+');
 });

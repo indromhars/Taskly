@@ -7,6 +7,7 @@ use Livewire\Livewire;
 use App\Livewire\Project\CreateProject;
 use App\Livewire\Project\EditProject;
 use App\Livewire\Project\DeleteProject;
+use App\Models\Team;
 
 class AppServiceProvider extends ServiceProvider
 {
