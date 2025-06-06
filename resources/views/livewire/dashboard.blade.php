@@ -113,7 +113,7 @@
                                         <span class="text-sm font-medium text-gray-900">{{ $tasksByStatus[$status] ?? 0 }}</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-2">
-                                        <div class="bg-{{ $status === 'todo' ? 'gray' : ($status === 'in_progress' ? 'blue' : 'green') }}-500 h-2 rounded-full" style="width: {{ isset($tasksByStatus[$status]) ? ($tasksByStatus[$status] / $totalTasks * 100) : 0 }}%"></div>
+                                        <div class="@if($status === 'todo') bg-gray-500 @elseif($status === 'in_progress') bg-blue-500 @else bg-green-500 @endif h-2 rounded-full" style="width: {{ isset($tasksByStatus[$status]) ? ($tasksByStatus[$status] / max($totalTasks, 1) * 100) : 0 }}%"></div>
                                     </div>
                                 </div>
                             @endforeach
