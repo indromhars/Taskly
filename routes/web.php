@@ -53,4 +53,8 @@ Route::middleware([
     Route::get('/projects/{project}/kanban', TaskKanbanBoard::class)
         ->name('projects.kanban')
         ->where('project', '[0-9]+');
+
+    Route::get('/notifications', function () {
+        return view('notifications.index');
+    })->name('notifications.index');
 });

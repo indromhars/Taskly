@@ -5,6 +5,8 @@ namespace App\Livewire\Project;
 use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 use LivewireUI\Modal\ModalComponent;
+use App\Notifications\ProjectCreatedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class CreateProject extends ModalComponent
 {
@@ -24,7 +26,7 @@ class CreateProject extends ModalComponent
     {
         $this->validate();
 
-        Project::create([
+        $project = Project::create([
             'title' => $this->title,
             'description' => $this->description,
             'start_date' => $this->start_date,
@@ -32,6 +34,19 @@ class CreateProject extends ModalComponent
             'team_id' => Auth::user()->currentTeam->id,
             'user_id' => Auth::user()->id,
         ]);
+
+        $creator = Auth::user();
+        $team = $creator->currentTeam;
+
+        if ($team) {
+            $usersToNotify = $team->allUsers()->where('id', '!=', $creator->id);
+
+            // Notify all relevant users
+            Notification::send($usersToNotify, new ProjectCreatedNotification($project));
+
+            // Optionally, notify the creator as well if they want to see their own actions
+            Notification::send($creator, new ProjectCreatedNotification($project));
+        }
 
         $this->dispatch('projectCreated');
         $this->closeModal();

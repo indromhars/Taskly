@@ -8,6 +8,9 @@ use App\Models\Project;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\TaskStatusChangedNotification;
 
 #[Layout('layouts.app')]
 class TaskKanbanBoard extends Component
@@ -46,10 +49,43 @@ class TaskKanbanBoard extends Component
         foreach ($orderedGroups as $group) {
             $status = $group['value'];
             foreach ($group['items'] as $item) {
-                Task::where('id', $item['value'])->update([
-                    'order' => $item['order'],
-                    'status' => $status
-                ]);
+                $task = Task::find($item['value']);
+                $oldStatus = $task->status;
+
+                if ($oldStatus !== $status) {
+                    // Update the task
+                    $task->update([
+                        'order' => $item['order'],
+                        'status' => $status
+                    ]);
+
+                    // Get the current user who moved the task
+                    $movedBy = Auth::user();
+
+                    // Get all users in the current team
+                    $team = $movedBy->currentTeam;
+                    if ($team) {
+                        // Get all users in the current team, excluding the mover
+                        $usersToNotify = $team->allUsers()->where('id', '!=', $movedBy->id);
+
+                        // Create notification with formatted status
+                        $notification = new TaskStatusChangedNotification(
+                            $task,
+                            $this->statuses[$oldStatus] ?? $oldStatus,
+                            $this->statuses[$status] ?? $status,
+                            $movedBy
+                        );
+
+                        // Notify all relevant users
+                        Notification::send($usersToNotify, $notification);
+
+                        // Optionally, notify the mover as well
+                        Notification::send($movedBy, $notification);
+                    }
+                } else {
+                    // If only the order changed, just update the order
+                    $task->update(['order' => $item['order']]);
+                }
             }
         }
 
