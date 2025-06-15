@@ -8,6 +8,7 @@ use LivewireUI\Modal\ModalComponent;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\TaskAddedNotification;
+use App\Notifications\TaskCreatedNotification;
 
 class CreateTask extends ModalComponent
 {
@@ -35,39 +36,34 @@ class CreateTask extends ModalComponent
         'assignee_id' => 'nullable|exists:users,id'
     ];
 
-    public function create()
+    public function store()
     {
         $this->validate();
 
         $task = Task::create([
             'title' => $this->title,
             'description' => $this->description,
+            'due_date' => $this->due_date,
             'status' => $this->status,
             'priority' => $this->priority,
-            'due_date' => $this->due_date,
-            'assignee_id' => $this->assignee_id,
             'project_id' => $this->projectId,
-            'order' => Task::where('project_id', $this->projectId)
-                ->where('status', $this->status)
-                ->count()
+            'assignee_id' => $this->assignee_id,
         ]);
 
-        // Dispatch notification to relevant team members
-        $adder = Auth::user();
-        $team = $adder->currentTeam;
+        $creator = Auth::user();
+        $team = $creator->currentTeam;
 
         if ($team) {
-            // Get all users in the current team, excluding the adder
-            $usersToNotify = $team->allUsers()->where('id', '!=', $adder->id);
+            $usersToNotify = $team->allUsers()->where('id', '!=', $creator->id);
 
             // Notify all relevant users
-            Notification::send($usersToNotify, new TaskAddedNotification($task, $adder->name));
+            Notification::send($usersToNotify, new TaskCreatedNotification($task));
 
-            // Optionally, notify the adder as well if they want to see their own actions
-            Notification::send($adder, new TaskAddedNotification($task, $adder->name));
+            // Optionally, notify the creator as well if they want to see their own actions
+            Notification::send($creator, new TaskCreatedNotification($task));
         }
 
-        $this->dispatch('task-created');
+        $this->dispatch('task-created')->to('task.task-kanban-board');
         $this->closeModal();
     }
 

@@ -12,32 +12,31 @@ class DeleteProject extends ModalComponent
 {
     public $projectId;
     public $title;
+    public $project;
 
     public function mount(Project $project)
     {
         $this->projectId = $project->id;
         $this->title = $project->title;
+        $this->project = $project;
     }
 
     public function delete()
     {
-        $project = Project::find($this->projectId);
-        if ($project) {
-            $project->delete();
+        if ($this->project) {
+            $this->project->delete();
 
             $deleter = Auth::user();
             $team = $deleter->currentTeam;
 
             if ($team) {
                 $usersToNotify = $team->allUsers()->where('id', '!=', $deleter->id);
-
-                Notification::send($usersToNotify, new ProjectDeletedNotification($project, $deleter->name));
-
-                Notification::send($deleter, new ProjectDeletedNotification($project, $deleter->name));
+                Notification::send($usersToNotify, new ProjectDeletedNotification($this->project, $deleter->name));
+                Notification::send($deleter, new ProjectDeletedNotification($this->project, $deleter->name));
             }
         }
 
-        $this->dispatch('projectDeleted');
+        $this->dispatch('project-deleted')->to('project.project-list');
         $this->closeModal();
     }
 

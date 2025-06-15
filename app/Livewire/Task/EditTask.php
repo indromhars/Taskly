@@ -5,6 +5,9 @@ namespace App\Livewire\Task;
 use Livewire\Component;
 use App\Models\Task;
 use LivewireUI\Modal\ModalComponent;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\TaskUpdatedNotification;
 
 class EditTask extends ModalComponent
 {
@@ -29,18 +32,28 @@ class EditTask extends ModalComponent
 
     public function update()
     {
-        $validated = $this->validate([
-            'title' => 'required|min:3',
-            'description' => 'nullable',
-            'status' => 'required|in:todo,in_progress,done',
-            'priority' => 'required|in:low,medium,high',
-            'due_date' => 'nullable|date',
-            'assignee_id' => 'nullable|exists:users,id'
+        $this->validate();
+
+        $this->task->update([
+            'title' => $this->title,
+            'description' => $this->description,
+            'due_date' => $this->due_date,
+            'status' => $this->status,
+            'priority' => $this->priority,
+            'assignee_id' => $this->assignee_id,
         ]);
 
-        $this->task->update($validated);
+        $updater = Auth::user();
+        $team = $updater->currentTeam;
 
-        $this->dispatch('task-updated');
+        if ($team) {
+            $usersToNotify = $team->allUsers()->where('id', '!=', $updater->id);
+
+            Notification::send($usersToNotify, new TaskUpdatedNotification($this->task, $updater->name));
+            Notification::send($updater, new TaskUpdatedNotification($this->task, $updater->name));
+        }
+
+        $this->dispatch('task-updated')->to('task.task-kanban-board');
         $this->closeModal();
     }
 

@@ -5,6 +5,8 @@ namespace App\Livewire\Project;
 use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 use LivewireUI\Modal\ModalComponent;
+use App\Notifications\ProjectUpdatedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class EditProject extends ModalComponent
 {
@@ -34,17 +36,23 @@ class EditProject extends ModalComponent
     {
         $this->validate();
 
-        $project = Project::find($this->projectId);
-        $project->update([
+        $this->project->update([
             'title' => $this->title,
             'description' => $this->description,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
-            'team_id' => Auth::user()->currentTeam->id,
-            'user_id' => Auth::user()->id,
         ]);
 
-        $this->dispatch('projectUpdated');
+        $updater = Auth::user();
+        $team = $updater->currentTeam;
+
+        if ($team) {
+            $usersToNotify = $team->allUsers()->where('id', '!=', $updater->id);
+            Notification::send($usersToNotify, new ProjectUpdatedNotification($this->project, $updater->name));
+            Notification::send($updater, new ProjectUpdatedNotification($this->project, $updater->name));
+        }
+
+        $this->dispatch('project-updated')->to('project.project-list');
         $this->closeModal();
     }
 

@@ -3,7 +3,7 @@
         Create New Task
     </h2>
 
-    <form wire:submit="create" class="space-y-4">
+    <form wire:submit="store" class="space-y-4">
         <div>
             <x-label for="title" value="{{ __('Title') }}" />
             <x-input wire:model="title" id="title" type="text" class="mt-1 block w-full" />

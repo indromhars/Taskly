@@ -22,6 +22,7 @@
 
         <div class="min-h-screen bg-gray-100">
             @livewire('navigation-menu')
+            @livewire('auto-refresh')
 
             <!-- Page Content -->
             <main class="ml-64">

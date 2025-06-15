@@ -5,7 +5,7 @@ namespace App\Notifications;
 use App\Models\Project;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\DatabaseMessage;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,7 +32,19 @@ class ProjectDeletedNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['mail', 'database'];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Project Deleted')
+            ->line('Project "' . $this->project->title . '" has been deleted.')
+            ->line('Deleted by: ' . $this->deleterName)
+            ->line('Thank you for using our application!');
     }
 
     /**
@@ -46,6 +58,7 @@ class ProjectDeletedNotification extends Notification implements ShouldQueue
             'project_title' => $this->project->title,
             'deleted_by_user_id' => Auth::id(),
             'deleted_by_user_name' => $this->deleterName,
+            'type' => 'project_deleted'
         ];
     }
 

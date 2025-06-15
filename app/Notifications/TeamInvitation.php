@@ -26,7 +26,7 @@ class TeamInvitation extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail($notifiable)
@@ -54,5 +54,19 @@ class TeamInvitation extends Notification implements ShouldQueue
             ->line('This invitation will expire in 7 days.')
             ->line('If you did not expect this invitation, you can safely ignore this email.')
             ->line('Thank you for using our application!');
+    }
+
+    public function toDatabase($notifiable)
+    {
+        return [
+            'message' => $this->inviter->name . ' has invited you to join their team "' . $this->team->name . '"',
+            'team_id' => $this->team->id,
+            'team_name' => $this->team->name,
+            'inviter_id' => $this->inviter->id,
+            'inviter_name' => $this->inviter->name,
+            'invitation_id' => $this->invitation->id,
+            'role' => $this->invitation->role,
+            'type' => 'team_invitation'
+        ];
     }
 }

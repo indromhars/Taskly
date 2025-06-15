@@ -14,6 +14,7 @@ class CreateProject extends ModalComponent
     public $description;
     public $start_date;
     public $end_date;
+    public $team_id;
 
     protected $rules = [
         'title' => 'required|min:3',
@@ -31,8 +32,7 @@ class CreateProject extends ModalComponent
             'description' => $this->description,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
-            'team_id' => Auth::user()->currentTeam->id,
-            'user_id' => Auth::user()->id,
+            'team_id' => $this->team_id,
         ]);
 
         $creator = Auth::user();
@@ -40,15 +40,11 @@ class CreateProject extends ModalComponent
 
         if ($team) {
             $usersToNotify = $team->allUsers()->where('id', '!=', $creator->id);
-
-            // Notify all relevant users
-            Notification::send($usersToNotify, new ProjectCreatedNotification($project));
-
-            // Optionally, notify the creator as well if they want to see their own actions
-            Notification::send($creator, new ProjectCreatedNotification($project));
+            Notification::send($usersToNotify, new ProjectCreatedNotification($project, $creator->name));
+            Notification::send($creator, new ProjectCreatedNotification($project, $creator->name));
         }
 
-        $this->dispatch('projectCreated');
+        $this->dispatch('project-created')->to('project.project-list');
         $this->closeModal();
     }
 
