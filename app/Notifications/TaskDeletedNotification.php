@@ -29,22 +29,9 @@ class TaskDeletedNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('Task Deleted')
-            ->line('Task "' . $this->task->title . '" has been deleted.')
-            ->line('Deleted by: ' . $this->deleterName)
-            ->line('Project: ' . $this->task->project->title)
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**

@@ -20,7 +20,7 @@ class DeleteTask extends ModalComponent
     public function delete()
     {
         if ($this->task) {
-            $this->task->delete();
+        $this->task->delete();
 
             $deleter = Auth::user();
             $team = $deleter->currentTeam;

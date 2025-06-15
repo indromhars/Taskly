@@ -7,13 +7,11 @@ use App\Models\User;
 use Closure;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Jetstream\Contracts\InvitesTeamMembers;
 use Laravel\Jetstream\Events\InvitingTeamMember;
 use Laravel\Jetstream\Jetstream;
-use Laravel\Jetstream\Mail\TeamInvitation;
 use Laravel\Jetstream\Rules\Role;
 
 class InviteTeamMember implements InvitesTeamMembers
@@ -34,7 +32,16 @@ class InviteTeamMember implements InvitesTeamMembers
             'role' => $role,
         ]);
 
-        Mail::to($email)->send(new TeamInvitation($invitation));
+        // Find the user by email if they exist
+        $invitedUser = User::where('email', $email)->first();
+
+        if ($invitedUser) {
+            // Only send notification to the invited user
+            $invitedUser->notify(new \App\Notifications\TeamInvitation($team, $user, $invitation));
+
+            // Dispatch event for real-time updates
+            event(new \App\Events\TeamInvitationSent($invitedUser, $team, $user));
+        }
     }
 
     /**

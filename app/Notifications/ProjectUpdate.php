@@ -25,32 +25,21 @@ class ProjectUpdate extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
-    public function toMail($notifiable)
-    {
-        $message = (new MailMessage)
-            ->subject('Project Update: ' . $this->project->title)
-            ->greeting('Hello!');
+    // Remove toMail method since we're not using email notifications
+    // public function toMail($notifiable)
+    // {
+    //     $message = (new MailMessage)
+    //         ->subject('Project Update: ' . $this->project->name)
+    //         ->greeting('Hello!')
+    //         ->line('There has been an update to the project "' . $this->project->name . '".')
+    //         ->line('Update Type: ' . $this->updateType)
+    //         ->line('Updated by: ' . $this->updatedBy->name)
+    //         ->action('View Project', url('/projects/' . $this->project->id))
+    //         ->line('Thank you for using our application!');
 
-        switch ($this->updateType) {
-            case 'created':
-                $message->line($this->updater->name . ' has created a new project "' . $this->project->title . '"')
-                    ->line('Description: ' . $this->project->description)
-                    ->line('Start Date: ' . $this->project->start_date)
-                    ->line('End Date: ' . $this->project->end_date);
-                break;
-            case 'updated':
-                $message->line($this->updater->name . ' has updated the project "' . $this->project->title . '"');
-                break;
-            case 'deleted':
-                $message->line($this->updater->name . ' has deleted the project "' . $this->project->title . '"');
-                break;
-        }
-
-        return $message
-            ->action('View Project', url('/projects/' . $this->project->id))
-            ->line('Thank you for using our application!');
-    }
+    //     return $message;
+    // }
 }

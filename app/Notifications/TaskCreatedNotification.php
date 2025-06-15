@@ -19,23 +19,9 @@ class TaskCreatedNotification extends Notification implements ShouldQueue
         $this->task = $task;
     }
 
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('New Task Created')
-            ->line('A new task "' . $this->task->title . '" has been created.')
-            ->line('Project: ' . $this->task->project->title)
-            ->line('Description: ' . $this->task->description)
-            ->line('Due Date: ' . $this->task->due_date->format('Y-m-d'))
-            ->line('Priority: ' . ucfirst($this->task->priority))
-            ->line('Status: ' . ucfirst($this->task->status))
-            ->action('View Task', url('/tasks/' . $this->task->id))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     public function toDatabase(object $notifiable): array

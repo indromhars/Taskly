@@ -25,21 +25,9 @@ class TaskStatusChangedNotification extends Notification implements ShouldQueue
         $this->movedBy = $movedBy;
     }
 
-    public function via($notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail($notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('Task Status Changed')
-            ->line('The status of task "' . $this->task->title . '" has been changed.')
-            ->line('From: ' . $this->oldStatus)
-            ->line('To: ' . $this->newStatus)
-            ->line('Moved by: ' . $this->movedBy->name)
-            ->action('View Task', url('/projects/' . $this->task->project_id . '/kanban'))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     public function toDatabase($notifiable): array

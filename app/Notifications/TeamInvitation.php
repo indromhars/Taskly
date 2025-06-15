@@ -26,39 +26,16 @@ class TeamInvitation extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail($notifiable)
-    {
-        $acceptUrl = URL::temporarySignedRoute(
-            'team.invitation.accept',
-            now()->addDays(7),
-            ['invitation' => $this->invitation->id]
-        );
-
-        $rejectUrl = URL::temporarySignedRoute(
-            'team.invitation.reject',
-            now()->addDays(7),
-            ['invitation' => $this->invitation->id]
-        );
-
-        return (new MailMessage)
-            ->subject('Team Invitation: ' . $this->team->name)
-            ->greeting('Hello!')
-            ->line($this->inviter->name . ' has invited you to join their team "' . $this->team->name . '"')
-            ->line('Role: ' . ucfirst($this->invitation->role))
-            ->action('Accept Invitation', $acceptUrl)
-            ->line('Or click the button below to reject:')
-            ->action('Reject Invitation', $rejectUrl)
-            ->line('This invitation will expire in 7 days.')
-            ->line('If you did not expect this invitation, you can safely ignore this email.')
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     public function toDatabase($notifiable)
     {
-        return [
+        // Ensure 'responded' and 'response' keys are always present
+        $responded = (isset($this->invitation->responded_at) && $this->invitation->responded_at);
+        $responseStatus = $this->invitation->response;
+
+        $notificationData = [
             'message' => $this->inviter->name . ' has invited you to join their team "' . $this->team->name . '"',
             'team_id' => $this->team->id,
             'team_name' => $this->team->name,
@@ -66,7 +43,39 @@ class TeamInvitation extends Notification implements ShouldQueue
             'inviter_name' => $this->inviter->name,
             'invitation_id' => $this->invitation->id,
             'role' => $this->invitation->role,
-            'type' => 'team_invitation'
+            'type' => 'team_invitation',
+            'responded' => $responded,
+            'response' => $responseStatus,
         ];
+
+        // Only add actions if the invitation has NOT been responded to
+        if (!$responded) {
+            $acceptUrl = URL::temporarySignedRoute(
+                'team.invitation.accept',
+                now()->addDays(7),
+                ['invitation' => $this->invitation->id]
+            );
+
+            $rejectUrl = URL::temporarySignedRoute(
+                'team.invitation.reject',
+                now()->addDays(7),
+                ['invitation' => $this->invitation->id]
+            );
+
+            $notificationData['actions'] = [
+                [
+                    'label' => 'Accept',
+                    'url' => $acceptUrl,
+                    'class' => 'bg-green-500 hover:bg-green-600 text-white'
+                ],
+                [
+                    'label' => 'Reject',
+                    'url' => $rejectUrl,
+                    'class' => 'bg-red-500 hover:bg-red-600 text-white'
+                ]
+            ];
+        }
+
+        return $notificationData;
     }
 }

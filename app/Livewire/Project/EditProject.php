@@ -15,6 +15,7 @@ class EditProject extends ModalComponent
     public $description;
     public $start_date;
     public $end_date;
+    public $project;
 
     protected $rules = [
         'title' => 'required|min:3',
@@ -30,6 +31,7 @@ class EditProject extends ModalComponent
         $this->description = $project->description;
         $this->start_date = $project->start_date->format('Y-m-d');
         $this->end_date = $project->end_date->format('Y-m-d');
+        $this->project = $project;
     }
 
     public function update()

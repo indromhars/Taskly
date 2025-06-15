@@ -29,22 +29,9 @@ class TaskAddedNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via($notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail($notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('New Task Added')
-            ->line('A new task has been added: "' . $this->task->title . '"')
-            ->line('Added by: ' . $this->addedBy->name)
-            ->action('View Task', url('/projects/' . $this->task->project_id . '/kanban'))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     public function toDatabase($notifiable): array

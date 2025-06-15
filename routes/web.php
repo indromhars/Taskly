@@ -7,14 +7,16 @@ use App\Http\Controllers\TeamController;
 use App\Livewire\Project\ProjectList;
 use App\Livewire\Task\TaskKanbanBoard;
 
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('home');
+
 
     Route::get('/dashboard', function () {
         return view('dashboard');

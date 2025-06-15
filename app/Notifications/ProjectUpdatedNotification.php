@@ -30,22 +30,9 @@ class ProjectUpdatedNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('Project Updated')
-            ->line('Project "' . $this->project->title . '" has been updated.')
-            ->line('Updated by: ' . $this->updaterName)
-            ->action('View Project', url('/projects/' . $this->project->id))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**

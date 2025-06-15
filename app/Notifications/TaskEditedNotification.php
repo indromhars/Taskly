@@ -34,26 +34,7 @@ class TaskEditedNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable): array
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail($notifiable): MailMessage
-    {
-        $message = (new MailMessage)
-            ->subject('Task Updated')
-            ->line('Task "' . $this->task->title . '" has been updated.')
-            ->line('Updated by: ' . $this->editedBy->name);
-
-        foreach ($this->changes as $field => $change) {
-            $message->line("Changed {$field}: {$change['old']} → {$change['new']}");
-        }
-
-        return $message
-            ->action('View Task', url('/projects/' . $this->task->project_id . '/kanban'))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**

@@ -22,19 +22,9 @@ class TaskAssignedNotification extends Notification implements ShouldQueue
         $this->assignedBy = $assignedBy;
     }
 
-    public function via($notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    public function toMail($notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('New Task Assigned')
-            ->line('You have been assigned to a new task: "' . $this->task->title . '"')
-            ->line('Assigned by: ' . $this->assignedBy->name)
-            ->action('View Task', url('/tasks/' . $this->task->id))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     public function toArray($notifiable): array

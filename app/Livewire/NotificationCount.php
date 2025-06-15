@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationCount extends Component
 {
-    protected $listeners = ['notificationReceived' => '$refresh'];
+    protected $listeners = [
+        'notificationReceived' => '$refresh',
+        'team.invitation.sent' => '$refresh'
+    ];
 
     public function getUnreadCountProperty()
     {

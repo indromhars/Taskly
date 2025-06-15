@@ -23,8 +23,17 @@ class InviteTeamMember
             'role' => $role,
         ]);
 
-        // Send notification
-        $invitation->notify(new TeamInvitation($team, $user));
+        // Find the user by email if they exist
+        $invitedUser = \App\Models\User::where('email', $email)->first();
+
+        if ($invitedUser) {
+            // Only send notification to the invited user
+            $invitedUser->notify(new \App\Notifications\TeamInvitation($team, $user, $invitation));
+
+
+            // Dispatch event for real-time updates
+            event(new \App\Events\TeamInvitationSent($invitedUser, $team, $user));
+        }
 
         return $invitation;
     }
@@ -44,7 +53,7 @@ class InviteTeamMember
         return array_filter([
             'email' => ['required', 'email', 'max:255', 'unique:team_invitations,email'],
             'role' => Jetstream::hasRoles()
-                            ? ['required', 'string', 'in:'.implode(',', array_keys(Jetstream::roles()))]
+                            ? ['required', 'string', 'in:'.implode(',', array_keys(Jetstream::$roles))]
                             : '',
         ]);
     }

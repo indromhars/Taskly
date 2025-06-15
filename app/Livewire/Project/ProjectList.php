@@ -6,23 +6,25 @@ use App\Models\Project;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 
 class ProjectList extends Component
 {
     use WithPagination;
 
-    protected $listeners = ['projectCreated', 'projectUpdated', 'projectDeleted'];
-
+    #[On('project-created')]
     public function projectCreated()
     {
         $this->dispatch('notify', 'Project created successfully!');
     }
 
+    #[On('project-updated')]
     public function projectUpdated()
     {
         $this->dispatch('notify', 'Project updated successfully!');
     }
 
+    #[On('project-deleted')]
     public function projectDeleted()
     {
         $this->dispatch('notify', 'Project deleted successfully!');

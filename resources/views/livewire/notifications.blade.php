@@ -1,11 +1,28 @@
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-semibold text-gray-800">Notifications</h2>
-        @if($this->unreadCount > 0)
-            <button wire:click="markAllAsRead" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Mark all as read
+        <div class="flex space-x-2">
+            @if($this->unreadCount > 0)
+                <button wire:click="markAllAsRead" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                    Mark all as read
+                </button>
+            @endif
+            @if(count($selectedNotifications) > 0)
+                <button wire:click="deleteSelected" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                    Delete Selected
+                </button>
+            @endif
+            <button wire:click="deleteAll" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                Clear All
             </button>
-        @endif
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <label class="inline-flex items-center">
+            <input type="checkbox" wire:model.live="selectAll" class="form-checkbox h-5 w-5 text-blue-600">
+            <span class="ml-2 text-gray-700">Select All</span>
+        </label>
     </div>
 
     <div class="space-y-4">
@@ -14,9 +31,23 @@
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <div class="flex items-center space-x-2">
+                            <input type="checkbox"
+                                   wire:model.live="selectedNotifications"
+                                   value="{{ $notification->id }}"
+                                   class="form-checkbox h-5 w-5 text-blue-600">
                             @php
                                 // Ensure notification data is treated as an array
                                 $notificationData = is_string($notification->data) ? json_decode($notification->data, true) : $notification->data;
+                                // Ensure notificationData is an array and provide default values for 'responded' and 'response'
+                                if (!is_array($notificationData)) {
+                                    $notificationData = [];
+                                }
+                                if (($notificationData['type'] ?? '') === 'team_invitation' && !isset($notificationData['responded'])) {
+                                    $notificationData['responded'] = false;
+                                }
+                                if (($notificationData['type'] ?? '') === 'team_invitation' && !isset($notificationData['response'])) {
+                                    $notificationData['response'] = null;
+                                }
                             @endphp
                             @switch($notificationData['type'] ?? '')
                                 @case('task_added')
@@ -42,6 +73,21 @@
                                 @case('task_status_changed')
                                     <svg class="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
+                                    @break
+                                @case('team_invitation')
+                                    <svg class="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    @break
+                                @case('team_invitation_response')
+                                    <svg class="h-5 w-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    @break
+                                @case('team_member_removed')
+                                    <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                     </svg>
                                     @break
                                 @default
@@ -74,6 +120,20 @@
                                             $newStatus = $notificationData['new_status'] ?? 'new status';
                                             $message = "{$movedBy} moved task '{$taskTitle}' from '{$oldStatus}' to '{$newStatus}'";
                                             break;
+                                        case 'team_invitation':
+                                            $inviterName = $notificationData['inviter_name'] ?? 'Someone';
+                                            $teamName = $notificationData['team_name'] ?? 'a team';
+                                            $role = $notificationData['role'] ?? 'member';
+                                            $message = "{$inviterName} has invited you to join their team '{$teamName}' as {$role}";
+                                            break;
+                                        case 'team_invitation_response':
+                                            $message = $notificationData['message'];
+                                            break;
+                                        case 'team_member_removed':
+                                            $removerName = $notificationData['remover_name'] ?? 'Someone';
+                                            $teamName = $notificationData['team_name'] ?? 'a team';
+                                            $message = "{$removerName} has removed you from the team '{$teamName}'";
+                                            break;
                                         default:
                                             $message = $notificationData['message'] ?? 'Notification';
                                     }
@@ -84,6 +144,27 @@
                                         <span class="font-medium">From:</span> {{ $notificationData['old_status'] ?? 'N/A' }}
                                         <span class="mx-2">→</span>
                                         <span class="font-medium">To:</span> {{ $notificationData['new_status'] ?? 'N/A' }}
+                                    </div>
+                                @endif
+                                @if($type === 'team_invitation')
+                                    @if(($notificationData['responded'] ?? false) === true)
+                                        <div class="mt-1 text-sm {{ ($notificationData['response'] ?? '') === 'accepted' ? 'text-green-600' : 'text-red-600' }}">
+                                            You {{ $notificationData['response'] ?? 'responded to' }} this invitation
+                                        </div>
+                                    @elseif(isset($notificationData['actions']) && ($notificationData['responded'] ?? false) === false)
+                                        <div class="mt-3 flex space-x-2">
+                                            @foreach($notificationData['actions'] as $action)
+                                                <a href="{{ $action['url'] }}"
+                                                   class="px-4 py-2 rounded-md text-sm font-medium {{ $action['class'] }}">
+                                                    {{ $action['label'] }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @endif
+                                @if($type === 'team_invitation_response')
+                                    <div class="mt-1 text-sm {{ $notificationData['response'] === 'accepted' ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ $notificationData['message'] }}
                                     </div>
                                 @endif
                             </div>

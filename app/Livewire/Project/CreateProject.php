@@ -32,7 +32,8 @@ class CreateProject extends ModalComponent
             'description' => $this->description,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
-            'team_id' => $this->team_id,
+            'team_id' => Auth::user()->currentTeam->id,
+            'user_id' => Auth::id(),
         ]);
 
         $creator = Auth::user();

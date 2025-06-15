@@ -30,21 +30,9 @@ class ProjectDeletedNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('Project Deleted')
-            ->line('Project "' . $this->project->title . '" has been deleted.')
-            ->line('Deleted by: ' . $this->deleterName)
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**

@@ -27,25 +27,9 @@ class ProjectCreatedNotification extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject('New Project Created')
-            ->line('A new project "' . $this->project->title . '" has been created.')
-            ->line('Created by: ' . ($this->project->user->name ?? 'N/A'))
-            ->line('Description: ' . $this->project->description)
-            ->line('Start Date: ' . $this->project->start_date->format('Y-m-d'))
-            ->line('End Date: ' . $this->project->end_date->format('Y-m-d'))
-            ->action('View Project', url('/projects/' . $this->project->id))
-            ->line('Thank you for using our application!');
+        return ['database'];
     }
 
     /**

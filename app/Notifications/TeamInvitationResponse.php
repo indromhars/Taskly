@@ -25,22 +25,22 @@ class TeamInvitationResponse extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['mail'];
+        // Only send to the team owner
+        return $notifiable->id === $this->team->user_id ? ['database'] : [];
     }
 
-    public function toMail($notifiable)
+    public function toDatabase($notifiable)
     {
-        $message = (new MailMessage)
-            ->subject('Team Invitation Response: ' . $this->team->name)
-            ->greeting('Hello!');
-
-        if ($this->response === 'accepted') {
-            $message->line($this->user->name . ' has accepted your invitation to join the team "' . $this->team->name . '"')
-                ->action('View Team', url('/teams/' . $this->team->id));
-        } else {
-            $message->line($this->user->name . ' has declined your invitation to join the team "' . $this->team->name . '"');
-        }
-
-        return $message;
+        return [
+            'message' => $this->response === 'accepted'
+                ? $this->user->name . ' has accepted your invitation to join the team "' . $this->team->name . '"'
+                : $this->user->name . ' has declined your invitation to join the team "' . $this->team->name . '"',
+            'team_id' => $this->team->id,
+            'team_name' => $this->team->name,
+            'user_id' => $this->user->id,
+            'user_name' => $this->user->name,
+            'response' => $this->response,
+            'type' => 'team_invitation_response'
+        ];
     }
 }

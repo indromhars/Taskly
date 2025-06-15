@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Laravel\Jetstream\Contracts\RemovesTeamMembers;
 use Laravel\Jetstream\Events\TeamMemberRemoved;
+use App\Notifications\TeamMemberRemoved as TeamMemberRemovedNotification;
 
 class RemoveTeamMember implements RemovesTeamMembers
 {
@@ -22,6 +23,11 @@ class RemoveTeamMember implements RemovesTeamMembers
         $this->ensureUserDoesNotOwnTeam($teamMember, $team);
 
         $team->removeUser($teamMember);
+
+        // Send notification to the removed user
+        if ($teamMember) {
+            $teamMember->notify(new TeamMemberRemovedNotification($team, $user));
+        }
 
         TeamMemberRemoved::dispatch($team, $teamMember);
     }
