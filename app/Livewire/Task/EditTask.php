@@ -19,6 +19,15 @@ class EditTask extends ModalComponent
     public $due_date;
     public $assignee_id;
 
+    public $rules = [
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'status' => 'required|string',
+        'priority' => 'required|string',
+        'due_date' => 'nullable|date',
+        'assignee_id' => 'nullable|exists:users,id',
+    ];
+
     public function mount(Task $task)
     {
         $this->task = $task;
