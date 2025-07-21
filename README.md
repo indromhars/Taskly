@@ -38,7 +38,7 @@ Follow these steps to get Taskly up and running on your local machine:
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/taskly.git
+git clone https://github.com/indromhars/taskly.git
 cd taskly
 ```
 
